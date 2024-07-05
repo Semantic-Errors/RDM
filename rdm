@@ -1,0 +1,59 @@
+#!/bin/bash
+
+RDM_MOUNT_POINT="/mnt/tmpfs"
+
+welcome_screen() {
+    clear
+    echo "======================================================================="
+    echo "                            Welcome to RDM                             "
+    echo "======================================================================="
+    echo "                RDM stands for RAM Disk Mounter Script.                "
+    echo "This script will help you set up a RAM disk on your Unix-based systems."
+    echo ""
+    echo "A RAM disk is a portion of your system's RAM that is mounted and used"
+    echo "as a disk drive."
+    echo "======================================================================="
+    echo ""
+
+    while true; do
+        read -p "Do you want to continue? (y/n): " choice
+        case "$choice" in
+            y|Y ) break;;
+            ""  ) break;;
+            n|N ) echo "Exiting the script."; exit 0;;
+            *   ) echo "Invalid input. Please enter 'y' to continue or 'n' to exit.";;
+        esac
+    done
+}
+
+validate_size() {
+    local size=$1
+    if [[ $size =~ ^[0-9]+[GM]$ ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+
+welcome_screen
+
+while true; do
+    echo ""
+    read -p "Enter the size of the RAM disk you need to mount, in Megabytes ('M') and ('G') for Gigabytes (e.g.: 512M, 1G): " SIZE 
+    if validate_size $SIZE; then
+        break
+    else
+        echo "Invalid size format. Please enter a valid size (e.g., 1G, 512M)."
+    fi
+done
+
+
+if [ ! -d "$RDM_MOUNT_POINT" ]; then
+    echo "Creating the ram mount point directory at $RDM_MOUNT_POINT"
+    sudo mkdir -p $RDM_MOUNT_POINT
+fi
+
+echo "Mounting RAM disk of size $SIZE to $RDM_MOUNT_POINT"
+sudo mount -o size=$SIZE tmpfs $RDM_MOUNT_POINT
+
